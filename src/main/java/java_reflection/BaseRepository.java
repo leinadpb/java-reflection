@@ -9,7 +9,9 @@ import java.util.Map;
 
 public class BaseRepository<T> {
 
-    protected void save(Object object, String procedureName) {
+    private final String PREFIX_SP_NAME = "p_";
+
+    protected void save(Object object) {
         Class cls = object.getClass();
 
         Field[] fields = cls.getDeclaredFields();
@@ -18,7 +20,7 @@ public class BaseRepository<T> {
 
         for(int i = 0; i < fields.length; i++) {
             Field field = fields[i];
-            inParams = appendParams(inParams, field, object);
+            inParams = appendParams(inParams, field, object, getFieldName(field));
         }
 
         // Instantiate DBConnectionManager with Schema and Package and procedureName
@@ -28,17 +30,18 @@ public class BaseRepository<T> {
         System.out.println("END ----");
     }
 
-    private Map<String, Object> appendParams(Map<String, Object> inParams, Field field, Object object) {
+    private Map<String, Object> appendParams(Map<String, Object> inParams, Field field, Object object, String fieldName) {
        try {
            field.setAccessible(true);
            Object fieldValue = field.get(object);
+
            if (fieldValue == boolean.class || fieldValue instanceof Boolean
                    || fieldValue == long.class || fieldValue instanceof Long
                    || fieldValue == int.class  || fieldValue instanceof Integer
                    || fieldValue instanceof String || fieldValue == null)
            {
 
-               inParams.put(getFieldName(field), fieldValue);
+               inParams.put(fieldName, fieldValue);
 
            } else {
                Field[] values = fieldValue.getClass().getDeclaredFields();
@@ -46,7 +49,7 @@ public class BaseRepository<T> {
                    Field value = values[i];
                    Annotation ignoreAnnotation = value.getAnnotation(IgnoreReflection.class);
                    if (ignoreAnnotation == null) {
-                       appendParams(inParams, value, fieldValue);
+                       appendParams(inParams, value, fieldValue, appendToFieldName(fieldName, value));
                    }
                }
            }
@@ -56,8 +59,19 @@ public class BaseRepository<T> {
         return inParams;
     }
 
+    private String appendToFieldName(String name, Field field) {
+        int index = PREFIX_SP_NAME.length();
+
+        String newFieldName = field.getName().toLowerCase();
+
+        String first = name.substring(0, index);
+        String last = name.substring(index);
+
+        return first + last + "_" + newFieldName;
+    }
+
     private String getFieldName(Field field) {
-        return "p_" + field.getName().toLowerCase();
+        return PREFIX_SP_NAME + field.getName().toLowerCase();
     }
 
     private Object getFieldValue(Field field, Object object) throws IllegalAccessException {

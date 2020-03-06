@@ -2,13 +2,13 @@ package java_reflection;
 
 public class PhoneTech {
 
-    private String tech;
+    private String name;
 
-    public String getTech() {
-        return tech;
+    public String getName() {
+        return name;
     }
 
-    public void setTech(String tech) {
-        this.tech = tech;
+    public void setName(String name) {
+        this.name = name;
     }
 }

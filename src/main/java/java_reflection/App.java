@@ -14,10 +14,10 @@ public class App
         client.setName("Daniel");
 
         PhoneTech tech = new PhoneTech();
-        tech.setTech("4G");
+        tech.setName("4G");
 
         PhoneType type = new PhoneType();
-        type.setType("SAMSUNG");
+        type.setName("SAMSUNG");
 
         phone.setOwner(client);
         phone.setTech(tech);
