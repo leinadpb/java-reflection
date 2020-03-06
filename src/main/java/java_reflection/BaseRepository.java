@@ -11,7 +11,13 @@ public class BaseRepository<T> {
 
     private final String PREFIX_SP_NAME = "p_";
 
+    // TODO: Update
+    // TODO: Delete
+    // TODO: FindOne
+    // TODO: FindAll
+
     protected void save(Object object) {
+        // TODO: Should Throws Exception from method:  appendParams and others. So make a generic exception for this BaseRepository :)
         Class cls = object.getClass();
 
         Field[] fields = cls.getDeclaredFields();
@@ -35,6 +41,7 @@ public class BaseRepository<T> {
            field.setAccessible(true);
            Object fieldValue = field.get(object);
 
+           // TODO: Should move this "if" to a method, it can get messy with time...
            if (fieldValue == boolean.class || fieldValue instanceof Boolean
                    || fieldValue == long.class || fieldValue instanceof Long
                    || fieldValue == int.class  || fieldValue instanceof Integer
@@ -55,6 +62,7 @@ public class BaseRepository<T> {
            }
        } catch (IllegalAccessException e) {
            e.printStackTrace();
+           // TODO: Should Throw Exception here because the operation will not be able to complete successfully.
        }
         return inParams;
     }
