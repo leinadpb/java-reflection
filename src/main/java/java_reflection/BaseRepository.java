@@ -51,7 +51,7 @@ public class BaseRepository<T> {
                    Field value = values[i];
                    Annotation ignoreAnnotation = value.getAnnotation(IgnoreReflection.class);
                    if (ignoreAnnotation == null) {
-                       if (!shouldBeTreatedDifferent(value, fieldValue)) {
+                       if (!shouldBeTreatedDifferent(value)) {
                            appendParams(inParams, value, fieldValue, appendToFieldName(fieldName, value));
                        } else {
                            // TODO: Throw RunTimeException to handled just by those who wanted it.
@@ -87,10 +87,9 @@ public class BaseRepository<T> {
     /**
      * Verify if a field should be treated different than tho be process in the same procedure.
      * @param field
-     * @param object
      * @return
      */
-    private boolean shouldBeTreatedDifferent(Field field, Object object) {
+    private boolean shouldBeTreatedDifferent(Field field) {
         boolean result = false;
 
         field.setAccessible(true);
