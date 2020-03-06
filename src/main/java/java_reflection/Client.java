@@ -6,10 +6,11 @@ import java.util.List;
 
 public class Client {
 
-    @IgnoreReflection
     private List<Phone> phones;
 
     private String name;
+
+    @IgnoreReflection
     private String lastName;
 
     public List<Phone> getPhones() {

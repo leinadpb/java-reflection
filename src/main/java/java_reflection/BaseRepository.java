@@ -4,8 +4,7 @@ import java_reflection.annotations.IgnoreReflection;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class BaseRepository<T> {
 
@@ -41,11 +40,7 @@ public class BaseRepository<T> {
            field.setAccessible(true);
            Object fieldValue = field.get(object);
 
-           // TODO: Should move this "if" to a method, it can get messy with time...
-           if (fieldValue == boolean.class || fieldValue instanceof Boolean
-                   || fieldValue == long.class || fieldValue instanceof Long
-                   || fieldValue == int.class  || fieldValue instanceof Integer
-                   || fieldValue instanceof String || fieldValue == null)
+           if (isFieldLeaf(field, object))
            {
 
                inParams.put(fieldName, fieldValue);
@@ -56,7 +51,14 @@ public class BaseRepository<T> {
                    Field value = values[i];
                    Annotation ignoreAnnotation = value.getAnnotation(IgnoreReflection.class);
                    if (ignoreAnnotation == null) {
-                       appendParams(inParams, value, fieldValue, appendToFieldName(fieldName, value));
+                       if (!shouldBeTreatedDifferent(value, fieldValue)) {
+                           appendParams(inParams, value, fieldValue, appendToFieldName(fieldName, value));
+                       } else {
+                           // TODO: Throw RunTimeException to handled just by those who wanted it.
+                           // Should be ignore, the procedures we're creating are not designing for this.
+                           // If you want to save a list of object to an entity, create a particular method for it, iterate the list
+                           //   and save them individually
+                       }
                    }
                }
            }
@@ -82,28 +84,54 @@ public class BaseRepository<T> {
         return PREFIX_SP_NAME + field.getName().toLowerCase();
     }
 
-    private Object getFieldValue(Field field, Object object) throws IllegalAccessException {
-        Object value;
-        if (field.get(object) instanceof Boolean) {
-            return field.getBoolean(object);
+    /**
+     * Verify if a field should be treated different than tho be process in the same procedure.
+     * @param field
+     * @param object
+     * @return
+     */
+    private boolean shouldBeTreatedDifferent(Field field, Object object) {
+        boolean result = false;
 
-        } else if (field.get(object) instanceof Integer) {
-            return field.getInt(object);
+        field.setAccessible(true);
+        Class<?> type = field.getType();
+        if ( type.isAssignableFrom(List.class) || type.isAssignableFrom(Map.class) || type.isAssignableFrom(Set.class))
+        {
 
-        } else if (field.get(object) instanceof Long) {
-            return field.getLong(object);
+            result = true;
 
-        } else if (field.get(object) instanceof Byte) {
-            return field.getByte(object);
-
-        } else if (field.get(object) instanceof Float) {
-            return field.getFloat(object);
-
-        } else if (field.get(object) instanceof Short) {
-            return field.getShort(object);
-        } else {
-            return field.get(object);
         }
+
+        return result;
+    }
+
+    /**
+     * Verify if the field is considered primitive: boolean, integer, char, short, long, String, Map, Set, List
+     * @param field
+     * @param object
+     * @return
+     * @throws IllegalAccessException
+     */
+    private boolean isFieldLeaf(Field field, Object object) throws IllegalAccessException {
+        boolean result = false;
+        try {
+            field.setAccessible(true);
+            Object fieldValue = field.get(object);
+            if (fieldValue == boolean.class || fieldValue instanceof Boolean
+                    || fieldValue == long.class || fieldValue instanceof Long
+                    || fieldValue == int.class  || fieldValue instanceof Integer
+                    || fieldValue == short.class || fieldValue instanceof Short
+                    || fieldValue instanceof String
+                    || fieldValue == null)
+            {
+
+                result = true;
+
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
 }
