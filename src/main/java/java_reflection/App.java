@@ -19,6 +19,11 @@ public class App
         PhoneType type = new PhoneType();
         type.setName("SAMSUNG");
 
+        PhoneTechType techType = new PhoneTechType();
+        techType.setName("TECH TYPE SAMPLE");
+
+        tech.setType(techType);
+
         phone.setOwner(client);
         phone.setTech(tech);
         phone.setType(type);
